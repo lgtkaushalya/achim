@@ -9,6 +9,7 @@
   "homepage": "",
   "dependencies": {
     "react": "^15.1.0",
-    "babel": "*"
+    "babel": "*",
+    "react-bootstrap": "^0.29.4"
   }
 }

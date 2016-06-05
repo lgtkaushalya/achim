@@ -1,7 +1,11 @@
 var TaskHeading = React.createClass({
   render : function() {
+
+    var header = {
+      "text-align": "center"
+    };
     return (
-      <div class="heading"><h1>{this.props.headingText}</h1></div>
+      <div style={header} class="heading"><h1>{this.props.headingText}</h1></div>
     );
   }
 });
@@ -40,16 +44,21 @@ var Content = React.createClass({
 
 var TaskList = React.createClass({
   render : function() {
-      var tasks = this.props.data.map(function(task) {
+     var ListGroup = ReactBootstrap.ListGroup, ListGroupItem = ReactBootstrap.ListGroupItem;
+    var listGroupItem = {
+          padding: '0px'
+        };
+
+     var tasks = this.props.data.map(function(task) {
         return (
-          <Task data={task} />
+          <ListGroupItem style={listGroupItem}><Task data={task} /></ListGroupItem>
         )
       });
-      
+
       return (
-        <div className="task-list">
+        <ListGroup className="task-list">
           {tasks}
-        </div>
+        </ListGroup>
       )
   }
 });
@@ -57,11 +66,21 @@ var TaskList = React.createClass({
 
 var Task = React.createClass({
   render: function() {
+    var FormControl = ReactBootstrap.FormControl, InputGroup = ReactBootstrap.InputGroup, Button = ReactBootstrap.Button, InputGroupAddon = ReactBootstrap.InputGroup.Addon;
+
+    var addon = {
+          width: '100px'
+        };
+
     return (
       <div class="task">
-        <div class="task-name">{this.props.data.name}</div>
-          <TaskStatus data={this.props.data}></TaskStatus>
-          <TaskAction></TaskAction>
+          <InputGroup>
+            <FormControl type="text" value={this.props.data.name} disabled="true"/>
+            <InputGroupAddon style={addon}>{this.props.data.priority}</InputGroupAddon>
+            <InputGroupAddon style={addon}>{this.props.data.urgency}</InputGroupAddon>
+            <InputGroupAddon><Button calss="task-complete-button" bsSize="xsmall" bsStyle="success">Complete</Button>
+            <Button calss="task-delete-button" bsSize="xsmall" bsStyle="danger">Delete</Button></InputGroupAddon>
+          </InputGroup>
         </div>
       );
   }
@@ -94,20 +113,40 @@ var AddTaskBox = React.createClass({
     this.setState({name : "", priority : "", urgency : ""});
   },
   render: function(){
+
+    var dropdown = {
+      width: '160px'
+    };
+
+    var FormControl = ReactBootstrap.FormControl,  Button = ReactBootstrap.Button, ListGroup = ReactBootstrap.ListGroup, ListGroupItem = ReactBootstrap.ListGroupItem, InputGroup = ReactBootstrap.InputGroup, InputGroupButton = ReactBootstrap.InputGroup.Button;
+
     return (
       <div>
-        <input type="text" value={this.state.name} onChange={this.handleNameChange}></input>
-        <select class="priority" value={this.state.priority} onChange={this.handlePriorityChange}>
-          <option>--Select Priority--</option>
-          <option>High</option>
-          <option>Low</option>
-        </select>
-        <select class="urgency" value={this.state.urgency} onChange={this.handleUrgencyChange}>
-          <option>--Select Urgentness--</option>
-          <option>Urgent</option>
-          <option>Not Urgent</option>
-        </select>
-        <button class="add-button" onClick={this.handleAddTask}>Add Task</button></div>
+          <ListGroup>
+            <ListGroupItem>
+              <InputGroup>
+                <FormControl type="text" value={this.state.name} placeholder="Enter text" onChange={this.handleNameChange}/>
+                <InputGroupButton>
+                  <FormControl style={dropdown} class="priority" value={this.state.priority} onChange={this.handlePriorityChange} componentClass="select" placeholder="select">
+                    <option>--Select Priority--</option>
+                    <option value="High">High</option>
+                    <option value="Low">Low</option>
+                  </FormControl>
+                </InputGroupButton>
+                <InputGroupButton>
+                  <FormControl style={dropdown} class="urgency" value={this.state.urgency} onChange={this.handleUrgencyChange} componentClass="select" placeholder="select">
+                    <option>--Select Urgency--</option>
+                    <option value="High">Urgent</option>
+                    <option value="Low">Not Urgent</option>
+                  </FormControl>
+                </InputGroupButton>
+                <InputGroupButton>
+                  <Button calss="add-button" onClick={this.handleAddTask} bsStyle="success">Add Task</Button>
+                </InputGroupButton>
+              </InputGroup>
+            </ListGroupItem>
+          </ListGroup>
+        </div>
     );
   }
 });
@@ -125,14 +164,18 @@ var TaskStatus = React.createClass({
 
 var TaskAction = React.createClass({
   render: function() {
+    var ButtonToolbar = ReactBootstrap.ButtonToolbar,
+                Button  = ReactBootstrap.Button;
     return (
       <div class="task-actions">
-        <div class="task-complete-div">
-          <button class="task-complete-button">Complete</button>
-        </div>
-        <div class="task-delete-div">
-          <button class="task-delete-button">Remove</button>
-        </div>
+        <ButtonToolbar>
+          <div class="task-complete-div">
+            <Button calss="task-complete-button" bsSize="xsmall" bsStyle="success">Complete</Button>
+          </div>
+          <div class="task-delete-div">
+            <Button calss="task-delete-button" bsSize="xsmall" bsStyle="danger">Remove</Button>
+          </div>
+        </ButtonToolbar>
       </div>
     );
   }
