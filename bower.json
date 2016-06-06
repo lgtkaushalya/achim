@@ -10,6 +10,7 @@
   "dependencies": {
     "react": "^15.1.0",
     "babel": "*",
-    "react-bootstrap": "^0.29.4"
+    "react-bootstrap": "^0.29.4",
+    "bootstrap-css-only": "^3.3.6"
   }
 }

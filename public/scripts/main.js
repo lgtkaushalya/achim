@@ -14,10 +14,13 @@ var Content = React.createClass({
   getInitialState : function() {
     return {data : []};
   },
+  getEmptyTaskList : function() {
+    return {"Monday": [], "Tuesday": [], "Wednesday": [], "Thursday": [], "Friday": [], "Saturday": [], "Sunday": []};
+  },
   getTaskList : function() {
-    var taskList = JSON.parse(localStorage.getItem('taskList'));
+    var taskList = JSON.parse(localStorage.getItem('myTaskList'));
     if (!taskList) {
-    taskList = [];
+      taskList = this.getEmptyTaskList();
     }
     return taskList;
   },
@@ -25,10 +28,10 @@ var Content = React.createClass({
     var taskList = this.getTaskList();
     this.setState({data : taskList});
   },
-  handleAddTask: function(task) {
+  handleAddTask: function(task, category) {
     var taskList = this.state.data;
-    taskList.push(task);
-    localStorage.setItem('taskList', JSON.stringify(taskList));
+    taskList[category].push(task);
+    localStorage.setItem('myTaskList', JSON.stringify(taskList));
     this.setState({data: taskList})
   },
   render : function() {
@@ -43,26 +46,44 @@ var Content = React.createClass({
 });
 
 var TaskList = React.createClass({
-  render : function() {
-     var ListGroup = ReactBootstrap.ListGroup, ListGroupItem = ReactBootstrap.ListGroupItem;
-    var listGroupItem = {
-          padding: '0px'
-        };
-
-     var tasks = this.props.data.map(function(task) {
-        return (
-          <ListGroupItem style={listGroupItem}><Task data={task} /></ListGroupItem>
+    render : function() {
+      var ListGroup = ReactBootstrap.ListGroup;
+    
+      var dataObject = this.props.data;
+      var taskcategories = Object.keys(dataObject).map(function(category, value) {
+      return (
+          <TaskCategory category={category} tasks={dataObject[category]} />
         )
       });
 
       return (
         <ListGroup className="task-list">
-          {tasks}
+          {taskcategories}
         </ListGroup>
       )
   }
 });
 
+var TaskCategory = React.createClass({
+  render : function() {
+    var tasklist = this.props.tasks.map(function(task) {
+      var ListGroupItem = ReactBootstrap.ListGroupItem; 
+      var listGroupItem = {
+            padding: '0px'
+          };
+
+      return (
+        <ListGroupItem style={listGroupItem}><Task data={task} /></ListGroupItem>
+      )
+    });
+    return (
+      <div>
+        <div><h3>{this.props.category}</h3></div>
+        <div>{tasklist}</div>
+      </div>
+    );
+  }
+});
 
 var Task = React.createClass({
   render: function() {
@@ -76,8 +97,6 @@ var Task = React.createClass({
       <div class="task">
           <InputGroup>
             <FormControl type="text" value={this.props.data.name} disabled="true"/>
-            <InputGroupAddon style={addon}>{this.props.data.priority}</InputGroupAddon>
-            <InputGroupAddon style={addon}>{this.props.data.urgency}</InputGroupAddon>
             <InputGroupAddon><Button calss="task-complete-button" bsSize="xsmall" bsStyle="success">Complete</Button>
             <Button calss="task-delete-button" bsSize="xsmall" bsStyle="danger">Delete</Button></InputGroupAddon>
           </InputGroup>
@@ -88,29 +107,25 @@ var Task = React.createClass({
 
 var AddTaskBox = React.createClass({
   getInitialState: function() {
-    return {name : "", priority : "", urgency : "", status : "Incomplete"};
+    return {name : "", category: "", status : "Incomplete"};
   },
    handleNameChange : function(e) {
     this.setState({name : e.target.value});
   },
-  handlePriorityChange : function(e) {
-    this.setState({priority : e.target.value});
-  },
-  handleUrgencyChange : function(e) {
-    this.setState({urgency : e.target.value});
+  handleCategoryChange : function(e) {
+    this.setState({category : e.target.value});
   },
   handleAddTask : function() {
     var name = this.state.name;
-    var priority = this.state.priority;
-    var urgency = this.state.urgency;
+    var category = this.state.category;
 
-    if (!name || !priority || !urgency) {
+    if (!name || !category) {
       return;
     }
     
-    this.props.onAddTask({"name" : name, "priority" : priority, "urgency" : urgency, "status" : this.state.status});
+    this.props.onAddTask({"name" : name, "status" : this.state.status}, category);
     
-    this.setState({name : "", priority : "", urgency : ""});
+    this.setState({name : "", category : ""});
   },
   render: function(){
 
@@ -127,17 +142,15 @@ var AddTaskBox = React.createClass({
               <InputGroup>
                 <FormControl type="text" value={this.state.name} placeholder="Enter text" onChange={this.handleNameChange}/>
                 <InputGroupButton>
-                  <FormControl style={dropdown} class="priority" value={this.state.priority} onChange={this.handlePriorityChange} componentClass="select" placeholder="select">
-                    <option>--Select Priority--</option>
-                    <option value="High">High</option>
-                    <option value="Low">Low</option>
-                  </FormControl>
-                </InputGroupButton>
-                <InputGroupButton>
-                  <FormControl style={dropdown} class="urgency" value={this.state.urgency} onChange={this.handleUrgencyChange} componentClass="select" placeholder="select">
-                    <option>--Select Urgency--</option>
-                    <option value="High">Urgent</option>
-                    <option value="Low">Not Urgent</option>
+                  <FormControl style={dropdown} class="category" value={this.state.category} onChange={this.handleCategoryChange} componentClass="select" placeholder="select">
+                    <option>--Select Category--</option>
+                    <option>Monday</option>
+                    <option>Tuesday</option>
+                    <option>Wednesday</option>
+                    <option>Thursday</option>
+                    <option>Friday</option>
+                    <option>Saturday</option>
+                    <option>Sunday</option>
                   </FormControl>
                 </InputGroupButton>
                 <InputGroupButton>
@@ -147,36 +160,6 @@ var AddTaskBox = React.createClass({
             </ListGroupItem>
           </ListGroup>
         </div>
-    );
-  }
-});
-
-var TaskStatus = React.createClass({
-  render: function() {
-    return (
-      <div class="task-status">
-        <div class="task-priority">{this.props.data.priority}</div>
-        <div class="task-urgency">{this.props.data.urgency}</div>
-      </div>
-    );
-  }
-});
-
-var TaskAction = React.createClass({
-  render: function() {
-    var ButtonToolbar = ReactBootstrap.ButtonToolbar,
-                Button  = ReactBootstrap.Button;
-    return (
-      <div class="task-actions">
-        <ButtonToolbar>
-          <div class="task-complete-div">
-            <Button calss="task-complete-button" bsSize="xsmall" bsStyle="success">Complete</Button>
-          </div>
-          <div class="task-delete-div">
-            <Button calss="task-delete-button" bsSize="xsmall" bsStyle="danger">Remove</Button>
-          </div>
-        </ButtonToolbar>
-      </div>
     );
   }
 });
