@@ -14,24 +14,24 @@ var Content = React.createClass({
   getInitialState : function() {
     return {data : []};
   },
-  getEmptyTaskList : function() {
-    return {"Monday": [], "Tuesday": [], "Wednesday": [], "Thursday": [], "Friday": [], "Saturday": [], "Sunday": []};
+  setData : function(data) {
+    if (!data) {
+      data = [];
+    }
+    this.setState({data : data});
   },
   getTaskList : function() {
-    var taskList = JSON.parse(localStorage.getItem('myTaskList'));
-    if (!taskList) {
-      taskList = this.getEmptyTaskList();
-    }
-    return taskList;
+    this.props.fetchTasks(this.props.database, this.setData);
   },
   componentDidMount: function() {
-    var taskList = this.getTaskList();
-    this.setState({data : taskList});
+    this.props.fetchTasks(this.props.database, this.setData);
+    this.getTaskList();
   },
   handleAddTask: function(task, category) {
     var taskList = this.state.data;
-    taskList[category].push(task);
-    localStorage.setItem('myTaskList', JSON.stringify(taskList));
+    var key = Math.floor(Date.now() / 1000);
+    taskList[key] = task;
+    this.props.saveTask(this.props.database, task);
     this.setState({data: taskList})
   },
   render : function() {
@@ -50,16 +50,16 @@ var TaskList = React.createClass({
       var ListGroup = ReactBootstrap.ListGroup;
     
       var dataObject = this.props.data;
-      var taskcategories = Object.keys(dataObject).map(function(category, value) {
-      return (
-          <TaskCategory category={category} tasks={dataObject[category]} />
-        )
-      });
+      var taskList = [];
+      var key = 0;
+      for (key in dataObject){
+        taskList.push(<Task data={dataObject[key]}/>);
+      }
 
       return (
-        <ListGroup className="task-list">
-          {taskcategories}
-        </ListGroup>
+        <div>
+          {taskList}
+        </div>
       )
   }
 });
@@ -119,7 +119,7 @@ var AddTaskBox = React.createClass({
     var name = this.state.name;
     var category = this.state.category;
 
-    if (!name || !category) {
+    if (!name) {
       return;
     }
     
@@ -164,4 +164,4 @@ var AddTaskBox = React.createClass({
   }
 });
 
-ReactDOM.render(<Content/>, document.getElementById('content'));
+ReactDOM.render(<Content fetchTasks={fetchTaskList} saveTask={saveTask} database={database}/>, document.getElementById('content'));
