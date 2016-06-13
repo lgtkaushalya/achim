@@ -31,21 +31,29 @@ var Content = React.createClass({
     var taskList = this.state.data;
     var key = Math.floor(Date.now() / 1000);
     taskList[key] = task;
-    this.props.saveTask(this.props.database, task);
+    this.props.saveTask(this.props.database, key, task);
     this.setState({data: taskList});
   },
   handleDeleteTask: function(taskId) {
     var taskList = this.state.data;
     delete taskList[taskId];
     this.props.deleteTask(this.props.database, taskId);
-    this.setState({data: taskList})
+    this.setState({data: taskList});
+  },
+  handleCompleteTask: function(taskId) {
+    var taskList = this.state.data;
+    var task = taskList[taskId];
+    task['status'] = 'Complete';
+    taskList[taskId] = task
+    this.props.saveTask(this.props.database, taskId, task);
+    this.setState({data: taskList});
   },
   render : function() {
     return (
       <div class="content">
         <TaskHeading headingText="My Tasks"></TaskHeading>
         <AddTaskBox onAddTask={this.handleAddTask}></AddTaskBox>
-        <TaskList data={this.state.data} onDeleteTask={this.handleDeleteTask}></TaskList>
+        <TaskList data={this.state.data} onCompleteTask={this.handleCompleteTask} onDeleteTask={this.handleDeleteTask}></TaskList>
       </div>
       );
   }
@@ -59,7 +67,9 @@ var TaskList = React.createClass({
       var taskList = [];
       var key = 0;
       for (key in dataObject){
-        taskList.push(<Task data={dataObject[key]} onDeleteTask={this.props.onDeleteTask} taskKey={key} />);
+        if (dataObject[key]['status'] != 'Complete') {
+          taskList.push(<Task data={dataObject[key]} onCompleteTask={this.props.onCompleteTask} onDeleteTask={this.props.onDeleteTask} taskKey={key} />);
+        }
       }
 
       return (
@@ -92,8 +102,11 @@ var TaskCategory = React.createClass({
 });
 
 var Task = React.createClass({
-  handleOnDeleteTask : function(e) {
+  handleOnDeleteTask: function(e) {
     this.props.onDeleteTask(this.props.taskKey);
+  },
+  handleOnCompleteTask: function(e) {
+    this.props.onCompleteTask(this.props.taskKey)
   },
   render: function() {
     var FormControl = ReactBootstrap.FormControl, InputGroup = ReactBootstrap.InputGroup, Button = ReactBootstrap.Button, InputGroupAddon = ReactBootstrap.InputGroup.Addon;
@@ -106,7 +119,7 @@ var Task = React.createClass({
       <div class="task">
           <InputGroup>
             <FormControl type="text" value={this.props.data.name} disabled="true"/>
-            <InputGroupAddon><Button calss="task-complete-button" bsSize="xsmall" bsStyle="success">Complete</Button>
+            <InputGroupAddon><Button calss="task-complete-button" bsSize="xsmall" bsStyle="success" onClick={this.handleOnCompleteTask}>Complete</Button>
             <Button calss="task-delete-button" bsSize="xsmall" bsStyle="danger" onClick={this.handleOnDeleteTask}>Delete</Button></InputGroupAddon>
           </InputGroup>
         </div>
