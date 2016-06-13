@@ -32,6 +32,12 @@ var Content = React.createClass({
     var key = Math.floor(Date.now() / 1000);
     taskList[key] = task;
     this.props.saveTask(this.props.database, task);
+    this.setState({data: taskList});
+  },
+  handleDeleteTask: function(taskId) {
+    var taskList = this.state.data;
+    delete taskList[taskId];
+    this.props.deleteTask(this.props.database, taskId);
     this.setState({data: taskList})
   },
   render : function() {
@@ -39,7 +45,7 @@ var Content = React.createClass({
       <div class="content">
         <TaskHeading headingText="My Tasks"></TaskHeading>
         <AddTaskBox onAddTask={this.handleAddTask}></AddTaskBox>
-        <TaskList data={this.state.data}></TaskList>
+        <TaskList data={this.state.data} onDeleteTask={this.handleDeleteTask}></TaskList>
       </div>
       );
   }
@@ -53,7 +59,7 @@ var TaskList = React.createClass({
       var taskList = [];
       var key = 0;
       for (key in dataObject){
-        taskList.push(<Task data={dataObject[key]}/>);
+        taskList.push(<Task data={dataObject[key]} onDeleteTask={this.props.onDeleteTask} taskKey={key} />);
       }
 
       return (
@@ -86,6 +92,9 @@ var TaskCategory = React.createClass({
 });
 
 var Task = React.createClass({
+  handleOnDeleteTask : function(e) {
+    this.props.onDeleteTask(this.props.taskKey);
+  },
   render: function() {
     var FormControl = ReactBootstrap.FormControl, InputGroup = ReactBootstrap.InputGroup, Button = ReactBootstrap.Button, InputGroupAddon = ReactBootstrap.InputGroup.Addon;
 
@@ -98,7 +107,7 @@ var Task = React.createClass({
           <InputGroup>
             <FormControl type="text" value={this.props.data.name} disabled="true"/>
             <InputGroupAddon><Button calss="task-complete-button" bsSize="xsmall" bsStyle="success">Complete</Button>
-            <Button calss="task-delete-button" bsSize="xsmall" bsStyle="danger">Delete</Button></InputGroupAddon>
+            <Button calss="task-delete-button" bsSize="xsmall" bsStyle="danger" onClick={this.handleOnDeleteTask}>Delete</Button></InputGroupAddon>
           </InputGroup>
         </div>
       );
@@ -164,4 +173,4 @@ var AddTaskBox = React.createClass({
   }
 });
 
-ReactDOM.render(<Content fetchTasks={fetchTaskList} saveTask={saveTask} database={database}/>, document.getElementById('content'));
+ReactDOM.render(<Content fetchTasks={fetchTaskList} saveTask={saveTask} deleteTask={deleteTask} database={database}/>, document.getElementById('content'));

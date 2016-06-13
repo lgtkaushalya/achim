@@ -10,3 +10,7 @@ var fetchTaskList = function(database, setData) {
 var saveTask = function(database, task) {
   database.ref().child('taskList').push(task);
 }
+
+var deleteTask = function(database, taskId) {
+  database.ref('/taskList/'+taskId).remove();
+}
