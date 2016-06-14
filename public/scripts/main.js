@@ -129,25 +129,21 @@ var Task = React.createClass({
 
 var AddTaskBox = React.createClass({
   getInitialState: function() {
-    return {name : "", category: "", status : "Incomplete"};
+    return {name : "", status : "Incomplete"};
   },
    handleNameChange : function(e) {
     this.setState({name : e.target.value});
   },
-  handleCategoryChange : function(e) {
-    this.setState({category : e.target.value});
-  },
   handleAddTask : function() {
     var name = this.state.name;
-    var category = this.state.category;
 
     if (!name) {
       return;
     }
     
-    this.props.onAddTask({"name" : name, "status" : this.state.status}, category);
+    this.props.onAddTask({"name" : name, "status" : this.state.status});
     
-    this.setState({name : "", category : ""});
+    this.setState({name : ""});
   },
   render: function(){
 
@@ -163,18 +159,6 @@ var AddTaskBox = React.createClass({
             <ListGroupItem>
               <InputGroup>
                 <FormControl type="text" value={this.state.name} placeholder="Enter text" onChange={this.handleNameChange}/>
-                <InputGroupButton>
-                  <FormControl style={dropdown} class="category" value={this.state.category} onChange={this.handleCategoryChange} componentClass="select" placeholder="select">
-                    <option>--Select Category--</option>
-                    <option>Monday</option>
-                    <option>Tuesday</option>
-                    <option>Wednesday</option>
-                    <option>Thursday</option>
-                    <option>Friday</option>
-                    <option>Saturday</option>
-                    <option>Sunday</option>
-                  </FormControl>
-                </InputGroupButton>
                 <InputGroupButton>
                   <Button calss="add-button" onClick={this.handleAddTask} bsStyle="success">Add Task</Button>
                 </InputGroupButton>
