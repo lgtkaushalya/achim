@@ -1,6 +1,8 @@
 var React = require("react");
 var ReactDOM = require("react-dom");
 var ReactBootstrap = require("react-bootstrap");
+var DatePicker = require("react-bootstrap-date-picker");
+
 var database = require("./database.js");
 
 var TaskHeading = React.createClass({
@@ -106,7 +108,7 @@ var TaskCategory = React.createClass({
 
 var Task = React.createClass({
   getInitialState : function() {
-    return {name: this.props.data.name};
+    return {name: this.props.data.name, date: this.props.data.date};
   },
   handleNameChange : function(e) {
     this.setState({name : e.target.value});
@@ -126,19 +128,36 @@ var Task = React.createClass({
     task.status = 'Complete';
     this.props.onUpdateTask(this.props.taskKey, task);
   },
-  render: function() {
-    var FormControl = ReactBootstrap.FormControl, InputGroup = ReactBootstrap.InputGroup, Button = ReactBootstrap.Button, InputGroupAddon = ReactBootstrap.InputGroup.Addon;
+  handleOnDateChange: function(date) {
+    var formattedDate = "";
+    if (date != null) {
+      formattedDate = new Date(date).toString();
+    }
 
-    var addon = {
-          width: '100px'
+    var task = this.props.data;
+    this.setState({date : formattedDate});
+    task.date = formattedDate;
+    this.props.onUpdateTask(this.props.taskKey, task);
+  },
+  render: function() {
+    var FormControl = ReactBootstrap.FormControl, InputGroup = ReactBootstrap.InputGroup, Button = ReactBootstrap.Button, InputGroupAddon = ReactBootstrap.InputGroup.Addon, FormGroup = ReactBootstrap.FormGroup;
+
+    var datepicker = {
+          width: '160px',
+          padding: '0px'
         };
 
     return (
       <div class="task">
           <InputGroup>
             <FormControl type="text" value={this.state.name} onBlur={this.handleNameSave} onChange={this.handleNameChange}/>
-            <InputGroupAddon><Button calss="task-complete-button" bsSize="xsmall" bsStyle="success" onClick={this.handleOnCompleteTask}>Complete</Button>
-            <Button calss="task-delete-button" bsSize="xsmall" bsStyle="danger" onClick={this.handleOnDeleteTask}>Delete</Button></InputGroupAddon>
+            <InputGroupAddon style={datepicker}>
+              <DatePicker calendarPlacement="left" value={this.state.date} dateFormat="YYYY-MM-DD" onChange={this.handleOnDateChange} />
+            </InputGroupAddon>
+            <InputGroupAddon>
+              <Button className="task-complete-button" bsSize="xsmall" bsStyle="success" onClick={this.handleOnCompleteTask}>Complete</Button>
+              <Button className="task-delete-button" bsSize="xsmall" bsStyle="danger" onClick={this.handleOnDeleteTask}>Delete</Button>
+            </InputGroupAddon>
           </InputGroup>
         </div>
       );
@@ -147,10 +166,17 @@ var Task = React.createClass({
 
 var AddTaskBox = React.createClass({
   getInitialState: function() {
-    return {name : "", status : "Incomplete"};
+    return {name : "", status : "Incomplete", date: new Date().toString()};
   },
    handleNameChange : function(e) {
     this.setState({name : e.target.value});
+  },
+  handleOnDateChange: function(date) {
+    var formattedDate = "";
+    if (date != null) {
+      formattedDate = new Date(date).toString();
+    }
+    this.setState({date : formattedDate});
   },
   handleAddTask : function() {
     var name = this.state.name;
@@ -159,7 +185,7 @@ var AddTaskBox = React.createClass({
       return;
     }
     
-    this.props.onAddTask({"name" : name, "status" : this.state.status});
+    this.props.onAddTask({"name" : name, "status" : this.state.status, "date" : this.state.date});
     
     this.setState({name : ""});
   },
@@ -169,7 +195,12 @@ var AddTaskBox = React.createClass({
       width: '160px'
     };
 
-    var FormControl = ReactBootstrap.FormControl,  Button = ReactBootstrap.Button, ListGroup = ReactBootstrap.ListGroup, ListGroupItem = ReactBootstrap.ListGroupItem, InputGroup = ReactBootstrap.InputGroup, InputGroupButton = ReactBootstrap.InputGroup.Button;
+    var datepicker = {
+      width: '160px',
+      padding: '0px'
+    };
+
+    var FormControl = ReactBootstrap.FormControl,  Button = ReactBootstrap.Button, ListGroup = ReactBootstrap.ListGroup, ListGroupItem = ReactBootstrap.ListGroupItem, InputGroup = ReactBootstrap.InputGroup, InputGroupButton = ReactBootstrap.InputGroup.Button, InputGroupAddon = ReactBootstrap.InputGroup.Addon;
 
     return (
       <div>
@@ -177,6 +208,9 @@ var AddTaskBox = React.createClass({
             <ListGroupItem>
               <InputGroup>
                 <FormControl type="text" value={this.state.name} placeholder="Enter text" onChange={this.handleNameChange}/>
+                <InputGroupAddon style={datepicker}>
+                  <DatePicker calendarPlacement="left" value={this.state.date} dateFormat="YYYY-MM-DD" onChange={this.handleOnDateChange} />
+                </InputGroupAddon>
                 <InputGroupButton>
                   <Button calss="add-button" onClick={this.handleAddTask} bsStyle="success">Add Task</Button>
                 </InputGroupButton>
