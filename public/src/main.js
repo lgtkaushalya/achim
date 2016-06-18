@@ -1,3 +1,8 @@
+var React = require("react");
+var ReactDOM = require("react-dom");
+var ReactBootstrap = require("react-bootstrap");
+var database = require("./database.js");
+
 var TaskHeading = React.createClass({
   render : function() {
 
@@ -183,4 +188,4 @@ var AddTaskBox = React.createClass({
   }
 });
 
-ReactDOM.render(<Content fetchTasks={fetchTaskList} saveTask={saveTask} deleteTask={deleteTask} database={database}/>, document.getElementById('content'));
+ReactDOM.render(<Content fetchTasks={database.fetchTaskList} saveTask={database.saveTask} deleteTask={database.deleteTask} database={database.database}/>, document.getElementById('content'));
