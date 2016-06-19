@@ -140,23 +140,42 @@ var Task = React.createClass({
     this.props.onUpdateTask(this.props.taskKey, task);
   },
   render: function() {
-    var FormControl = ReactBootstrap.FormControl, InputGroup = ReactBootstrap.InputGroup, Button = ReactBootstrap.Button, InputGroupAddon = ReactBootstrap.InputGroup.Addon, FormGroup = ReactBootstrap.FormGroup;
+    var FormControl = ReactBootstrap.FormControl, InputGroup = ReactBootstrap.InputGroup, Button = ReactBootstrap.Button, InputGroupAddon = ReactBootstrap.InputGroup.Addon, FormGroup = ReactBootstrap.FormGroup, Glyphicon = ReactBootstrap.Glyphicon;
 
-    var datepicker = {
-          width: '160px',
-          padding: '0px'
-        };
+    var style = {
+      datepicker: {
+        width: '160px',
+        padding: '0px'
+      },
+      buttoninputgroup: {
+        padding: "3px 6px"
+      },
+      button: {
+        padding: "5px"
+      }
+    };
 
     return (
       <div class="task">
           <InputGroup>
             <FormControl type="text" value={this.state.name} onBlur={this.handleNameSave} onChange={this.handleNameChange}/>
-            <InputGroupAddon style={datepicker}>
+            <InputGroupAddon style={style.buttoninputgroup}>
+              <Button style={style.button} className="task-timer-button" bsSize="xsmall" bsStyle="primary">
+                <Glyphicon glyph="time"/>
+              </Button>
+            </InputGroupAddon>
+            <InputGroupAddon style={style.datepicker}>
               <DatePicker calendarPlacement="left" value={this.state.date} dateFormat="YYYY-MM-DD" onChange={this.handleOnDateChange} />
             </InputGroupAddon>
-            <InputGroupAddon>
-              <Button className="task-complete-button" bsSize="xsmall" bsStyle="success" onClick={this.handleOnCompleteTask}>Complete</Button>
-              <Button className="task-delete-button" bsSize="xsmall" bsStyle="danger" onClick={this.handleOnDeleteTask}>Delete</Button>
+            <InputGroupAddon style={style.buttoninputgroup}>
+              <Button style={style.button} className="task-complete-button" bsSize="xsmall" bsStyle="success" onClick={this.handleOnCompleteTask}>
+                <Glyphicon glyph="ok"/>
+              </Button>
+            </InputGroupAddon>
+            <InputGroupAddon style={style.buttoninputgroup}>
+              <Button style={style.button} className="task-delete-button" bsSize="xsmall" bsStyle="danger" onClick={this.handleOnDeleteTask}>
+                <Glyphicon glyph="remove"/>
+              </Button>
             </InputGroupAddon>
           </InputGroup>
         </div>
