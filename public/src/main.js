@@ -106,6 +106,76 @@ var TaskCategory = React.createClass({
   }
 });
 
+var Timer = React.createClass({
+  getInitialState: function() {
+    return {'time': this.props.time == null ? 0 : this.props.time, 'displayTime' :  this.getDisplayTime(this.props.time), 'isTimerOn' : false, 'timeIntervalPointer': null};
+  },
+  getDisplayTime : function(time) {
+
+    if (time == null) {
+      return "";
+    }
+
+    var minutes = parseInt(time / 60, 10);
+    var seconds = parseInt(time % 60, 10);
+
+    minutes = minutes < 10 ? "0" + minutes : minutes;
+    seconds = seconds < 10 ? "0" + seconds : seconds;
+
+    return minutes + ":" + seconds;
+  },
+  incrementTime: function() {
+    var time = this.state.time;
+    time += 1;
+    var displayTime = this.getDisplayTime(time);
+    this.setState({'time': time, 'displayTime' : displayTime});
+  },
+  startTimer : function() {
+    this.state.timeintervalpointer = setInterval(this.incrementTime, 1000);
+    this.setState({'isTimerOn' : true});
+  },
+  stopTimer : function() {
+    clearInterval(this.state.timeintervalpointer);
+    this.setState({'timeintervalpointer': null, 'isTimerOn' : false});
+    this.props.handleOnTimeSetByTimer(this.state.time);
+  },
+  render : function() {
+
+    var Button = ReactBootstrap.Button, InputGroupAddon = ReactBootstrap.InputGroup.Addon, Glyphicon = ReactBootstrap.Glyphicon, FormControl = ReactBootstrap.FormControl;
+
+    var timerControl = [];
+
+    var style = {
+      button : {
+        padding: "5px",
+        margin: "5px"
+      },
+      buttoninputgroup : {
+        padding: "0px",
+        width: "115px"
+      },
+      textfield : {
+        width: "70%"
+      }
+    }
+
+    if (this.state.isTimerOn != true && this.state.time == 0) {
+      timerControl.push(<Button style={style.button} onClick={this.startTimer} className="task-timer-button" bsSize="xsmall" bsStyle="primary"><Glyphicon glyph="time"/></Button>);
+    } else if (this.state.isTimerOn != true && this.state.time != 0) {
+      timerControl.push(<Button style={style.button} onClick={this.startTimer} className="task-timer-button" bsSize="xsmall" bsStyle="success"><Glyphicon glyph="play"/></Button>);
+    } else {
+      timerControl.push(<Button style={style.button} onClick={this.stopTimer} className="task-timer-button" bsSize="xsmall" bsStyle="danger"><Glyphicon glyph="off"/></Button>);  
+    }
+
+    return (
+      <InputGroupAddon style={style.buttoninputgroup}>
+        <FormControl placeholder="HH:MM" value={this.state.displayTime} style={style.textfield} type="text"/>
+        {timerControl}
+      </InputGroupAddon>
+    );
+  }
+});
+
 var Task = React.createClass({
   getInitialState : function() {
     return {name: this.props.data.name, date: this.props.data.date};
@@ -126,6 +196,11 @@ var Task = React.createClass({
   handleOnCompleteTask: function(e) {
     var task = this.props.data;
     task.status = 'Complete';
+    this.props.onUpdateTask(this.props.taskKey, task);
+  },
+  handleOnTimeSetByTimer: function(time) {
+    var task = this.props.data;
+    task.time = time;
     this.props.onUpdateTask(this.props.taskKey, task);
   },
   handleOnDateChange: function(date) {
@@ -159,11 +234,7 @@ var Task = React.createClass({
       <div class="task">
           <InputGroup>
             <FormControl type="text" value={this.state.name} onBlur={this.handleNameSave} onChange={this.handleNameChange}/>
-            <InputGroupAddon style={style.buttoninputgroup}>
-              <Button style={style.button} className="task-timer-button" bsSize="xsmall" bsStyle="primary">
-                <Glyphicon glyph="time"/>
-              </Button>
-            </InputGroupAddon>
+            <Timer handleOnTimeSetByTimer={this.handleOnTimeSetByTimer} time={this.props.data.time}/>
             <InputGroupAddon style={style.datepicker}>
               <DatePicker calendarPlacement="left" value={this.state.date} dateFormat="YYYY-MM-DD" onChange={this.handleOnDateChange} />
             </InputGroupAddon>
